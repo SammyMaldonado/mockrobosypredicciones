@@ -1,9 +1,10 @@
 import express from 'express';
 import stealRouter from './routes/steal.router.js';
+import delitosRouter from './routes/delitos.router.js';
 import config from './config/config.js';
 import cors from 'cors';
 import __dirname from '../src/utils.js';
-import { updateRandomSteals } from './controllers/steal.controller.js';
+//import { updateRandomSteals } from './controllers/steal.controller.js';
 
 
 const app = express();
@@ -16,10 +17,10 @@ app.use(cors({
 const PORT = config.app.PORT || 8080;
 const server = app.listen(PORT, () => console.log(`Listening on ${PORT}`));
 
-setInterval(() => {
+/* setInterval(() => {
   updateRandomSteals();
   console.log('Base de datos actualizada automáticamente.');
-}, 10 * 1000);
+}, 10 * 1000); */
 
 //app config
 app.use(express.json());
@@ -28,3 +29,4 @@ app.use(express.urlencoded({ extended: true }));
 
 //Routes
 app.use('/api/steal', stealRouter);
+app.use('/api/delitos', delitosRouter);

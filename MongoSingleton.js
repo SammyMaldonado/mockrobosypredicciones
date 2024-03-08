@@ -4,7 +4,7 @@ import config from './src/config/config.js';
 export default class MongoSingleton {
   static #instance;
   constructor() {
-    mongoose.connect(config.mongo.TEST) //Cambiar la conexion a .TEST para hacer las pruebas
+    mongoose.connect(config.mongo.URL) //Cambiar la conexion a .TEST para hacer las pruebas
   }
 
   static getInstance() {

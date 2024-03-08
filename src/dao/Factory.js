@@ -8,18 +8,22 @@ const persistence = "MONGO";
 export default class PersistenceFactory {
   static async getPersistence() {
     let stealsDAO;
+    let delitosDAO;
 
     switch (config.PERSISTENCE) {
       case "MONGO":
         MongoSingleton.getInstance();
         const { default: StealsManager } = await import('./mongo/Managers/StealsManager.js');
+        const { default: delitosManager } = await import('./mongo/Managers/DelitosManager.js');
         stealsDAO = new StealsManager();
+        delitosDAO = new delitosManager();
         break;
 
       //Agregar mas casos según sea necesario
     }
     return {
-      stealsDAO
+      stealsDAO,
+      delitosDAO
     };
   }
 }

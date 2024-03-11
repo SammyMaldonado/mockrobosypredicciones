@@ -4,59 +4,47 @@ const delitosCollection = "delitosfaker";
 
 // Definir el esquema del documento
 const delitoSchema = new mongoose.Schema({
-    _id: {
+    _id: mongoose.Schema.Types.ObjectId,
+    intersection: {
         type: String,
-        required: true
+        required: true,
     },
-    number: {
+    month: {
         type: String,
-        required: true
+        required: true,
     },
-    location: {
-        type: {
-            type: String,
-            enum: ['Point'],
-            required: true
-        },
-        coordinates: {
-            type: [Number],
-            required: true
-        }
+    year: {
+        type: Number,
+        required: true,
     },
-    properties: {
-        name: {
-            type: String,
-            required: true
-        },
-        date: {
-            type: Date,
-            required: true
-        },
-        hour: {
-            type: Date,
-            required: true
-        },
-        address: {
-            type: String,
-            required: true
-        },
-        year: {
-            type: Number,
-            required: true
-        },
-        description: {
-            type: String,
-            required: true
-        },
-        category: {
-            type: String,
-            required: true
-        },
-        status: {
-            type: String,
-            required: true
-        }
-    }
+    day: {
+        type: String,
+        required: true,
+    },
+    hour_range: {
+        type: String,
+        required: true,
+    },
+    type: {
+        type: String,
+        required: true,
+    },
+    count: {
+        type: Number,
+        required: true,
+    },
+    forecast: {
+        type: Number,
+        required: true,
+    },
+    latitude: {
+        type: Number,
+        required: true,
+    },
+    longitude: {
+        type: Number,
+        required: true,
+    },
 });
 
 // Crear el modelo a partir del esquema

@@ -1,30 +1,39 @@
 import { faker } from "@faker-js/faker";
 
-export const generateDelitos = (latitud, longitud, hour, adress, type) => {
+export const generateDelitos = (intersection, month, year, day, hour, type, count, forecast, latitude, longitude) => {
 
   // Generar un ID aleatorio
   const _id = faker.string.uuid();
 
-  const latitudx = latitud;
-  const longitudx = longitud;
+  const adressx = intersection;
+  const monthx = month;
+  const yearx = year;
+  const dayx = day;
   const hourx = hour;
-  const adressx = adress;
   const typex = type;
+  const countx = count
+  const forecastx = forecast;
+  const latitudx = latitude;
+  const longitudx = longitude;
+
 
   // Generar datos de propiedades
   const properties = {
-    hour_range: hourx,
+    _id: _id,
     intersection: adressx,
-    latitude: latitudx,
-    longitude: longitudx,
+    month: monthx,
+    year: 2024,
+    day: dayx,
+    hour_range: hourx,
     type: typex,
     count: 1,
-    forecast: 1
+    forecast: 1,
+    latitude: latitudx,
+    longitude: longitudx,
   };
 
   // Crear el objeto completo
   return {
-    _id: _id,
     properties: properties
   };
 };

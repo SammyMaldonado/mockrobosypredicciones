@@ -1,4 +1,4 @@
-export default class DelitosService {
+export default class DelitosServiceReal {
   constructor(dao) {
     this.dao = dao;
   }

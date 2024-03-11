@@ -1,6 +1,6 @@
-import delitosModel from '../models/delitosModel.js';
+import delitosModel from '../models/delitosModelFake.js';
 
-export default class StealManager {
+export default class DelitosManagerFake {
     getDelitos = (params) => {
         return delitosModel.find(params).lean();
     }

@@ -67,52 +67,89 @@ const ubicacionAleatoria = (latitud, longitud, rangoMin, rangoMax) => {
   return { latitud: nuevaLatitudGrados, longitud: nuevaLongitudGrados };
 };
 
+// const createRandomDelitos = async (req, res) => {
+//   try {
+
+//     const delitos1 = await delitosServiceReal.getDelitos();
+//     const randomDelitos = [];
+
+//     delitos1.slice(0, 5).map(delitosx => {
+//       //const ubicacionOriginal = { latitud, longitud };
+//       const ubicacionRandom = ubicacionAleatoria(delitosx.location.coordinates[1], delitosx.location.coordinates[0], 10, 20);
+
+//       //console.log(delitosx.properties);
+
+//       const intersection = delitosx.properties.address;
+//       const month = faker.date.month();
+//       const year = "2024"
+//       const day = faker.date.weekday();
+//       const hour = delitosx.properties.hour;
+//       const type = delitosx.properties.description;
+//       const count = delitosx.properties.count;
+//       const forecast = delitosx.properties.forecast;
+//       const latitud = ubicacionRandom.latitud;
+//       const longitud = ubicacionRandom.longitud;
+
+
+//       // Agregar la nueva ubicación aleatoria al objeto delito
+//       delitosx.location.coordinates = [ubicacionRandom.longitud, ubicacionRandom.latitud];
+
+//       // Imprimir las ubicaciones en console.log
+//       //console.log("Ubicación Original:", ubicacionOriginal);
+//       //console.log("Ubicación Aleatoria:", { latitud: ubicacionRandom.latitud, longitud: ubicacionRandom.longitud });
+
+//       randomDelitos.push(generateDelitos(intersection, month, year, day, hour, type, count, forecast, latitud, longitud));
+//     })
+
+//     // Agregando los datos generados a la base de datos
+//     const createDelitos = await delitosServiceFake.createDelitos(randomDelitos);
+
+
+//     res.send({ status: "success", payload: createDelitos });
+//   } catch (error) {
+//     console.log(error);
+//     /* res.status(500).send({ status: "error", error: 'Error interno del servidor' }); */
+//   }
+// }
+
 const createRandomDelitos = async (req, res) => {
   try {
-
+    // Suponiendo que delitos1 ya contiene datos válidos
     const delitos1 = await delitosServiceReal.getDelitos();
-    const randomDelitos = [];
-
-    delitos1.slice(0, 5).map(delitosx => {
-      //const ubicacionOriginal = { latitud, longitud };
+    const randomDelitos = delitos1.slice(0, 5).map(delitosx => {
       const ubicacionRandom = ubicacionAleatoria(delitosx.location.coordinates[1], delitosx.location.coordinates[0], 10, 20);
 
-      //console.log(delitosx.properties);
-
+      // Asegúrate de que estos valores sean válidos y no `undefined`
       const intersection = delitosx.properties.address;
       const month = faker.date.month();
-      const year = "2024"
+      const year = "2024";
       const day = faker.date.weekday();
       const hour = delitosx.properties.hour;
       const type = delitosx.properties.description;
-      const count = delitosx.properties.count;
-      const forecast = delitosx.properties.forecast;
-      const latitud = ubicacionRandom.latitud;
-      const longitud = ubicacionRandom.longitud;
+      const count = 1; // Asumiendo un valor estático para el ejemplo
+      const forecast = 1; // Asumiendo un valor estático para el ejemplo
+      const latitude = ubicacionRandom.latitud;
+      const longitude = ubicacionRandom.longitud;
 
+      return generateDelitos(intersection, month, year, day, hour, type, count, forecast, latitude, longitude);
+    });
 
-      // Agregar la nueva ubicación aleatoria al objeto delito
-      delitosx.location.coordinates = [ubicacionRandom.longitud, ubicacionRandom.latitud];
-
-      // Imprimir las ubicaciones en console.log
-      //console.log("Ubicación Original:", ubicacionOriginal);
-      //console.log("Ubicación Aleatoria:", { latitud: ubicacionRandom.latitud, longitud: ubicacionRandom.longitud });
-
-      console.log(delitos1);
-
-      randomDelitos.push(generateDelitos(intersection, month, year, day, hour, type, count, forecast, latitud, longitud));
+    await delitosServiceFake.createDelitos(randomDelitos)
+    .then(result => {
+      console.log("Delitos insertados con éxito", result);
+      res.send({ status: "success", payload: result });
     })
+    .catch(error => {
+      console.error("Error insertando delitos", error);
+      res.status(500).send({ status: "error", message: 'Error insertando datos en la base de datos' });
+    });
 
-    // Agregando los datos generados a la base de datos
-    const createDelitos = await delitosServiceFake.createDelitos(randomDelitos);
-
-
-    res.send({ status: "success", payload: createDelitos });
-  } catch (error) {
-    console.log(error);
-    /* res.status(500).send({ status: "error", error: 'Error interno del servidor' }); */
-  }
+} catch (error) {
+  console.error(error);
+  res.status(500).send({ status: "error", message: 'Error interno del servidor' });
 }
+};
+
 
 export default {
   getDelitosReales,

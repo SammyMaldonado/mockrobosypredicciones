@@ -3,6 +3,7 @@
 import { generateDelitos } from "../mocks/delitos.mock.js";
 import { delitosServiceFake } from "../services/index.js";
 import { delitosServiceReal } from "../services/index.js";
+import { faker } from "@faker-js/faker/locale/es";
 
 
 const getDelitosReales = async (req, res) => {
@@ -27,71 +28,128 @@ const getRandomDelitos = async (req, res) => {
   }
 }
 
-const ubicacionAleatoria = () => {
-  const latitudInicial = 40.7128; // Ejemplo: Latitud de Nueva York
-  const longitudInicial = -74.0060; // Ejemplo: Longitud de Nueva York
+const ubicacionAleatoria = (latitud, longitud, rangoMin, rangoMax) => {
+  // Función para calcular la distancia entre dos puntos en la tierra (en metros)
+  const calcularDistancia = (lat1, lon1, lat2, lon2) => {
+    const radioTierra = 6371000; // Radio de la Tierra en metros
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distancia = radioTierra * c;
+    return distancia;
+  };
 
-  // Convertir latitud y longitud a metros (aproximadamente)
-  const latitudMetros = latitudInicial * 111000; // Aproximadamente 111,000 metros por grado de latitud
-  const longitudMetros = longitudInicial * 83000; // Aproximadamente 83,000 metros por grado de longitud
+  const latitudGrados = latitud * Math.PI / 180;
+  const longitudGrados = longitud * Math.PI / 180;
 
-  // Generar ángulo aleatorio en radianes
-  const angulo = Math.random() * 2 * Math.PI;
+  let nuevaLatitudGrados, nuevaLongitudGrados;
+  let distanciaAleatoria;
 
-  // Generar distancia aleatoria entre 10 y 15 metros
-  const distancia = Math.random() * 5 + 10;
+  // Garantizar que la distancia esté en el rango de 10 a 20 metros
+  do {
+    const anguloAleatorio = Math.random() * 2 * Math.PI; // Ángulo aleatorio en radianes
+    distanciaAleatoria = Math.random() * (rangoMax - rangoMin) + rangoMin; // Distancia aleatoria en metros
 
-  // Calcular nuevas coordenadas
-  const nuevaLatitudMetros = latitudMetros + distancia * Math.cos(angulo);
-  const nuevaLongitudMetros = longitudMetros + distancia * Math.sin(angulo);
+    // Calcular nueva latitud y longitud utilizando la fórmula haversine
+    nuevaLatitudGrados = Math.asin(Math.sin(latitudGrados) * Math.cos(distanciaAleatoria / 6371000) +
+      Math.cos(latitudGrados) * Math.sin(distanciaAleatoria / 6371000) * Math.cos(anguloAleatorio));
+    nuevaLongitudGrados = longitudGrados + Math.atan2(Math.sin(anguloAleatorio) * Math.sin(distanciaAleatoria / 6371000) * Math.cos(latitudGrados),
+      Math.cos(distanciaAleatoria / 6371000) - Math.sin(latitudGrados) * Math.sin(nuevaLatitudGrados));
 
-  // Convertir las nuevas coordenadas a grados
-  const nuevaLatitud = nuevaLatitudMetros / 111000;
-  const nuevaLongitud = nuevaLongitudMetros / 83000;
+    // Convertir latitud y longitud de nuevo a grados
+    nuevaLatitudGrados *= 180 / Math.PI;
+    nuevaLongitudGrados *= 180 / Math.PI;
+  } while (calcularDistancia(latitud, longitud, nuevaLatitudGrados, nuevaLongitudGrados) < rangoMin || calcularDistancia(latitud, longitud, nuevaLatitudGrados, nuevaLongitudGrados) > rangoMax);
 
-  console.log(nuevaLatitud);
-  console.log(nuevaLongitud);
+  return { latitud: nuevaLatitudGrados, longitud: nuevaLongitudGrados };
+};
 
-  return { latitud: nuevaLatitud, longitud: nuevaLongitud };
-}
+// const createRandomDelitos = async (req, res) => {
+//   try {
+
+//     const delitos1 = await delitosServiceReal.getDelitos();
+//     const randomDelitos = [];
+
+//     delitos1.slice(0, 5).map(delitosx => {
+//       //const ubicacionOriginal = { latitud, longitud };
+//       const ubicacionRandom = ubicacionAleatoria(delitosx.location.coordinates[1], delitosx.location.coordinates[0], 10, 20);
+
+//       //console.log(delitosx.properties);
+
+//       const intersection = delitosx.properties.address;
+//       const month = faker.date.month();
+//       const year = "2024"
+//       const day = faker.date.weekday();
+//       const hour = delitosx.properties.hour;
+//       const type = delitosx.properties.description;
+//       const count = delitosx.properties.count;
+//       const forecast = delitosx.properties.forecast;
+//       const latitud = ubicacionRandom.latitud;
+//       const longitud = ubicacionRandom.longitud;
+
+
+//       // Agregar la nueva ubicación aleatoria al objeto delito
+//       delitosx.location.coordinates = [ubicacionRandom.longitud, ubicacionRandom.latitud];
+
+//       // Imprimir las ubicaciones en console.log
+//       //console.log("Ubicación Original:", ubicacionOriginal);
+//       //console.log("Ubicación Aleatoria:", { latitud: ubicacionRandom.latitud, longitud: ubicacionRandom.longitud });
+
+//       randomDelitos.push(generateDelitos(intersection, month, year, day, hour, type, count, forecast, latitud, longitud));
+//     })
+
+//     // Agregando los datos generados a la base de datos
+//     const createDelitos = await delitosServiceFake.createDelitos(randomDelitos);
+
+
+//     res.send({ status: "success", payload: createDelitos });
+//   } catch (error) {
+//     console.log(error);
+//     /* res.status(500).send({ status: "error", error: 'Error interno del servidor' }); */
+//   }
+// }
 
 const createRandomDelitos = async (req, res) => {
   try {
-
+    // Suponiendo que delitos1 ya contiene datos válidos
     const delitos1 = await delitosServiceReal.getDelitos();
-    delitos1.slice(0, 5).map(delitosx => {
-      const latitud = delitosx.location.coordinates[1];
-      const longitud = delitosx.location.coordinates[0];
-      const hour = delitosx.properties.hour;
+    const randomDelitos = delitos1.slice(0, 5).map(delitosx => {
+      const ubicacionRandom = ubicacionAleatoria(delitosx.location.coordinates[1], delitosx.location.coordinates[0], 10, 20);
+
+      // Asegúrate de que estos valores sean válidos y no `undefined`
       const intersection = delitosx.properties.address;
-      const year = delitosx.properties.year;
-      const ubicacionRandom = ubicacionAleatoria();
-      console.log(ubicacionRandom);
+      const month = faker.date.month();
+      const year = "2024";
+      const day = faker.date.weekday();
+      const hour = delitosx.properties.hour;
+      const type = delitosx.properties.description;
+      const count = 1; // Asumiendo un valor estático para el ejemplo
+      const forecast = 1; // Asumiendo un valor estático para el ejemplo
+      const latitude = ubicacionRandom.latitud;
+      const longitude = ubicacionRandom.longitud;
 
-      //randomDelitos.push(generateDelitos(latitud, longitud, hour, adress, year));
+      return generateDelitos(intersection, month, year, day, hour, type, count, forecast, latitude, longitude);
+    });
+
+    await delitosServiceFake.createDelitos(randomDelitos)
+    .then(result => {
+      console.log("Delitos insertados con éxito", result);
+      res.send({ status: "success", payload: result });
     })
+    .catch(error => {
+      console.error("Error insertando delitos", error);
+      res.status(500).send({ status: "error", message: 'Error insertando datos en la base de datos' });
+    });
 
-    res.send({ status: "success", payload: delitos1.slice(0, 5) });
-
-    /* 
-        const limit = 5
-        const randomDelitos = [];
-    
-        //Endpoint que devolvera 100 datos de robos de prueba
-        for (let i = 0; i < limit; i++) {
-          randomDelitos.push(generateDelitos('Hola'));
-        }
-        console.log(randomDelitos)
-    
-        // Agregando los datos generados a la base de datos
-        const createDelitos = await delitosServiceFake.createDelitos(randomDelitos); */
-
-    //res.send({ status: "success", payload: createDelitos });
-  } catch (error) {
-    console.log(error);
-    /* res.status(500).send({ status: "error", error: 'Error interno del servidor' }); */
-  }
+} catch (error) {
+  console.error(error);
+  res.status(500).send({ status: "error", message: 'Error interno del servidor' });
 }
+};
+
 
 export default {
   getDelitosReales,
